@@ -1,0 +1,703 @@
+classdef app3 < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                       matlab.ui.Figure
+        TabGroup                       matlab.ui.container.TabGroup
+        Tab                            matlab.ui.container.Tab
+        PCALabel                       matlab.ui.control.Label
+        ImageInformationDisplayModule  matlab.ui.container.Panel
+        Button_display                 matlab.ui.control.StateButton
+        TextArea_ImageInformation      matlab.ui.control.TextArea
+        ImageProcessingControlModule   matlab.ui.container.Panel
+        ImageProcessingFunctionDemonstrationModule  matlab.ui.container.Panel
+        Button_Translation             matlab.ui.control.StateButton
+        yEditFieldLabel                matlab.ui.control.Label
+        yEditField                     matlab.ui.control.NumericEditField
+        xEditField                     matlab.ui.control.NumericEditField
+        xEditFieldLabel                matlab.ui.control.Label
+        EditField_Rotation             matlab.ui.control.NumericEditField
+        Label_4                        matlab.ui.control.Label
+        EditField_Shear                matlab.ui.control.NumericEditField
+        Label_2                        matlab.ui.control.Label
+        ButtonGroup                    matlab.ui.container.ButtonGroup
+        Button_Level                   matlab.ui.control.RadioButton
+        Button_Vertical                matlab.ui.control.RadioButton
+        Button_Rotation                matlab.ui.control.Button
+        Button_Shear                   matlab.ui.control.Button
+        Button_Scale                   matlab.ui.control.Button
+        Button_GrayLevelHistogram      matlab.ui.control.Button
+        ImageParameterDisplay          matlab.ui.container.Panel
+        TextArea_ImageParameter        matlab.ui.control.TextArea
+        ObtainImageParameter           matlab.ui.control.Button
+        ImageDisplay                   matlab.ui.container.Panel
+        UIAxes                         matlab.ui.control.UIAxes
+        ImageControl                   matlab.ui.container.Panel
+        Button_Equalization            matlab.ui.control.Button
+        Button_Graying                 matlab.ui.control.Button
+        Button_ClearImage              matlab.ui.control.Button
+        DropDown_2                     matlab.ui.control.DropDown
+        DropDown_2Label                matlab.ui.control.Label
+        DropDown                       matlab.ui.control.DropDown
+        DropDownLabel                  matlab.ui.control.Label
+        Button_InputImage              matlab.ui.control.Button
+        Tab_2                          matlab.ui.container.Tab
+        Panel                          matlab.ui.container.Panel
+        Button                         matlab.ui.control.Button
+        Button_2                       matlab.ui.control.Button
+        Button_4                       matlab.ui.control.Button
+        Button_3                       matlab.ui.control.Button
+        UIAxes2_2                      matlab.ui.control.UIAxes
+        UIAxes2_1                      matlab.ui.control.UIAxes
+    end
+
+    
+    properties (Access = private)
+        Property % Description
+    end
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: Button_InputImage
+        function Button_InputImagePushed(app, event)
+            global lln
+            
+            [filename, pathname] = uigetfile({'*.jpg'},'File Selector');
+            fullpathname = strcat(pathname,filename);
+            lln=imread(fullpathname);
+            imshow(lln,'Parent',app.UIAxes);
+            
+            
+        end
+
+        % Button pushed function: Button_Graying
+        function Button_GrayingPushed(app, event)
+            global lln
+            global I
+            I=rgb2gray(lln);
+            
+            imshow(I,'Parent',app.UIAxes);
+        end
+
+        % Button pushed function: Button_Equalization
+        function Button_EqualizationPushed(app, event)
+            global lln
+            j=histeq(lln);
+            imshow(j,'Parent',app.UIAxes);
+
+        end
+
+        % Button pushed function: Button_Rotation
+        function Button_RotationPushed(app, event)
+            global I
+            
+            
+            [M,N]=size(I);
+            ang=app.EditField_Rotation.Value;
+            J=I;
+            for i=1:M
+                for j=1:N
+                    x=floor((i-M/2)*cos(ang*pi/180)-(j-N/2)*sin(ang*pi/180)+0.5+M/2);
+                    y=floor((j-N/2)*cos(ang*pi/180)+(i-M/2)*sin(ang*pi/180)+0.5+N/2);
+                    if ((x<M) && (y<N) && (x>0) && (y>0))
+                        J(i,j)=I(x,y);
+                    else
+                        J(i,j)=0;
+                    end
+                end
+            end
+            imshow(J,'Parent',app.UIAxes);
+        end
+
+        % Selection changed function: ButtonGroup
+        function ButtonGroupSelectionChanged(app, event)
+           
+            global I
+            Vertical=flipud(I);
+            Level=fliplr(I);
+            selectedButton = app.ButtonGroup.SelectedObject;
+            switch selectedButton
+                case app.Button_Vertical
+                     imshow(Vertical,'Parent',app.UIAxes);
+                case app.Button_Level
+                    imshow(Level,'Parent',app.UIAxes);
+            end
+        end
+
+        % Button pushed function: Button_Scale
+        function Button_ScalePushed(app, event)
+            
+            global I
+            
+            a=app.EditField_Shear.Value;
+            %a=im2uint8(a);
+
+            Scale=imresize(I,a,'nearest');
+            imshow(Scale,'Parent',app.UIAxes);
+        
+            
+        end
+
+        % Button pushed function: Button_GrayLevelHistogram
+        function Button_GrayLevelHistogramPushed(app, event)
+            global I
+            figure('NumberTitle','off','Name','Gray Level Histogram');
+          
+            subplot(1,2,1);
+            imshow(I);
+            subplot(1,2,2);
+            %axes(app.UIAxes);
+            imhist(I);
+        end
+
+        % Button pushed function: Button_Shear
+        function Button_ShearPushed(app, event)
+            global I
+            %figure('NumberTitle','off','Name','Shear');
+            %subplot(1,2,1);
+            %imshow(I);
+            %subplot(1,2,2);
+            J=I';
+            imshow(J,'Parent',app.UIAxes);
+            
+        end
+
+        % Value changed function: Button_Translation
+        function Button_TranslationValueChanged(app, event)
+            global I
+            
+            value = app.Button_Translation.Value;
+            x=app.xEditField.Value;
+            y=app.yEditField.Value;
+            %x=im2uint8(x);可以不要
+            %y=im2uint8(y);
+
+            A=imtranslate(I,[x,y]);
+            figure('NumberTitle','off','Name','Translation');
+            subplot(1,2,1);
+            imshow(I);
+            subplot(1,2,2);
+            imshow(A);
+
+
+        end
+
+        % Button pushed function: Button_2
+        function Button_2Pushed(app, event)
+            global im;
+            [filename, pathname] = uigetfile({'*.bmp'},'choose photo');%可不可以考虑把BMP改为JPG！
+            str = [pathname, filename];
+            im = imread(str);
+            
+            %axes( handles.axes1);
+            imshow(im,'Parent',app.UIAxes2_1);
+            %选择
+        end
+
+        % Button down function: UIAxes2_1
+        function UIAxes2_1ButtonDown(app, event)
+            global im
+            global reference
+            global W
+            global imgmean
+            global col_of_data
+            global pathname
+            global img_path_list
+            global w
+            
+            % 预处理新数据
+            im = double(im(:));
+            objectone = w*(im - imgmean);
+            distance = 1000000000;%加了一个0
+            
+            % 最小距离法，寻找和待识别图片最为接近的训练图片
+            for k = 1:col_of_data
+                temp = norm(objectone - reference(:,k));
+                if(distance>temp)
+                    aimone = k;
+                    distance = temp;
+                    aimpath = strcat(pathname, '/', img_path_list(aimone).name);
+                    %axes( handles.axes2 )
+                    imshow(aimpath,'Parent',app.UIAxes2_2);
+                end
+            end
+        end
+
+        % Button pushed function: Button
+        function ButtonPushed(app, event)
+            global reference
+            global W
+            global imgmean
+            global col_of_data
+            global pathname
+            global img_path_list
+            global w
+            
+            % 批量读取指定文件夹下的图片————一个按钮，读取图片
+            pathname = uigetdir;
+            img_path_list = dir(strcat(pathname,'\*.bmp'));
+            img_num = length(img_path_list);
+            imagedata = [];
+            if img_num >0
+                for j = 1:img_num
+                    img_name = img_path_list(j).name;
+                    temp = imread(strcat(pathname, '/', img_name));
+                    temp = double(temp(:));
+                    imagedata = [imagedata, temp];
+                end
+            end
+            col_of_data = size(imagedata,2);
+            
+            % 中心化 & 计算协方差矩阵————一个按钮
+            imgmean = mean(imagedata,2);
+            for i = 1:col_of_data
+                imagedata(:,i) = imagedata(:,i) - imgmean;
+            end
+            covMat = imagedata'*imagedata;
+            [COEFF, latent, explained] = pcacov(covMat);
+            
+            % 选择构成95%能量的特征值
+            i = 1;
+            proportion = 0;
+            while(proportion < 95)
+                proportion = proportion + explained(i);
+                i = i+1;
+            end
+            p = i - 1;
+            
+            % 特征脸
+            W = imagedata*COEFF;    % N*M阶
+            W = W(:,1:p);           % N*p阶
+            w=W';
+            
+            % 训练样本在新座标基下的表达矩阵 p*M
+            reference = w*imagedata;
+        end
+
+        % Button pushed function: Button_4
+        function Button_4Pushed(app, event)
+            global W
+            global reference
+            global w
+            col_of_data = 60;
+            
+            pathname = uigetdir;
+            img_path_list = dir(strcat(pathname,'\*.bmp'));
+            img_num = length(img_path_list);
+            testdata = [];
+            if img_num >0
+                for j = 1:img_num
+                    img_name = img_path_list(j).name;
+                    temp = imread(strcat(pathname, '/', img_name));
+                    temp = double(temp(:));
+                    testdata = [testdata, temp];
+                end
+            end
+            col_of_test = size(testdata,2);
+            testdata = center( testdata );
+            object = w* testdata;
+            
+            % 最小距离法，寻找和待识别图片最为接近的训练图片
+            % 计算分类器准确率
+            num = 0;
+            for j = 1:col_of_test
+                distance = 1000000000000;
+                for k = 1:col_of_data
+                    temp = norm(object(:,j) - reference(:,k));
+                    if(distance>temp)
+                        aimone = k;
+                        distance = temp;
+                    end
+                end
+                if ceil(j/3)==ceil(aimone/4)
+                   num = num + 1;
+                end
+            end
+            accuracy = num/col_of_test;
+            msgbox(['分类器准确率:    ',num2str(accuracy)],'accuracy')
+        end
+
+        % Button pushed function: ObtainImageParameter
+        function ObtainImageParameterButtonPushed(app, event)
+            %if  app.isinputimgflag == 1
+                %if  iscell(app.img) == 1
+                 %   [MaxVal, MinVal, Avr, Var] = GetImgParams(app,app.img{1});
+                %elseif  app.isinputimgflag == 1
+                    %[MaxVal, MinVal, Avr, Var] = GetImgParams(app,app.img);
+                %end
+                %ImgParamStrings = {strcat('最大灰度值:',32,32,num2str(MaxVal)),strcat('最小灰度值:',32,32,num2str(MinVal))...
+                                   %strcat('灰度均值:',32,32,32,32,num2str(Avr)),strcat('灰度值方差:',32,32,num2str(Var))};
+                app.TextArea_ImageParameter.Text = ('梁灵娜');
+            end
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [10 10 1200 750];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create TabGroup
+            app.TabGroup = uitabgroup(app.UIFigure);
+            app.TabGroup.Position = [2 2 1200 749];
+
+            % Create Tab
+            app.Tab = uitab(app.TabGroup);
+            app.Tab.Title = '图像处理';
+
+            % Create ImageControl
+            app.ImageControl = uipanel(app.Tab);
+            app.ImageControl.ForegroundColor = [1 1 1];
+            app.ImageControl.TitlePosition = 'centertop';
+            app.ImageControl.Title = '图像输入控制模块';
+            app.ImageControl.BackgroundColor = [0 0 0];
+            app.ImageControl.FontName = '微软雅黑';
+            app.ImageControl.FontSize = 20;
+            app.ImageControl.Position = [9 334 261 288];
+
+            % Create Button_InputImage
+            app.Button_InputImage = uibutton(app.ImageControl, 'push');
+            app.Button_InputImage.ButtonPushedFcn = createCallbackFcn(app, @Button_InputImagePushed, true);
+            app.Button_InputImage.FontSize = 14;
+            app.Button_InputImage.Position = [12 199 100 36];
+            app.Button_InputImage.Text = {'输入图像'; ''};
+
+            % Create DropDownLabel
+            app.DropDownLabel = uilabel(app.ImageControl);
+            app.DropDownLabel.HorizontalAlignment = 'center';
+            app.DropDownLabel.FontSize = 14;
+            app.DropDownLabel.FontColor = [1 1 1];
+            app.DropDownLabel.Position = [12 138 113 32];
+            app.DropDownLabel.Text = {'图像显示类型'; ''};
+
+            % Create DropDown
+            app.DropDown = uidropdown(app.ImageControl);
+            app.DropDown.Items = {'自动', '原图', '新图'};
+            app.DropDown.FontSize = 14;
+            app.DropDown.Position = [152 139 75 32];
+            app.DropDown.Value = '自动';
+
+            % Create DropDown_2Label
+            app.DropDown_2Label = uilabel(app.ImageControl);
+            app.DropDown_2Label.HorizontalAlignment = 'center';
+            app.DropDown_2Label.FontSize = 14;
+            app.DropDown_2Label.FontColor = [1 1 1];
+            app.DropDown_2Label.Position = [12 75 141 33];
+            app.DropDown_2Label.Text = '是否选择外部图像';
+
+            % Create DropDown_2
+            app.DropDown_2 = uidropdown(app.ImageControl);
+            app.DropDown_2.Items = {'是', '否'};
+            app.DropDown_2.FontSize = 14;
+            app.DropDown_2.FontColor = [0.149 0.149 0.149];
+            app.DropDown_2.Position = [175 75 52 33];
+            app.DropDown_2.Value = '是';
+
+            % Create Button_ClearImage
+            app.Button_ClearImage = uibutton(app.ImageControl, 'push');
+            app.Button_ClearImage.FontSize = 14;
+            app.Button_ClearImage.Position = [137 198 100 36];
+            app.Button_ClearImage.Text = '清除图像';
+
+            % Create Button_Graying
+            app.Button_Graying = uibutton(app.ImageControl, 'push');
+            app.Button_Graying.ButtonPushedFcn = createCallbackFcn(app, @Button_GrayingPushed, true);
+            app.Button_Graying.FontSize = 14;
+            app.Button_Graying.Position = [12 20 100 35];
+            app.Button_Graying.Text = '灰度化';
+
+            % Create Button_Equalization
+            app.Button_Equalization = uibutton(app.ImageControl, 'push');
+            app.Button_Equalization.ButtonPushedFcn = createCallbackFcn(app, @Button_EqualizationPushed, true);
+            app.Button_Equalization.FontSize = 14;
+            app.Button_Equalization.Position = [137 20 100 35];
+            app.Button_Equalization.Text = '均衡化';
+
+            % Create ImageDisplay
+            app.ImageDisplay = uipanel(app.Tab);
+            app.ImageDisplay.ForegroundColor = [1 1 1];
+            app.ImageDisplay.TitlePosition = 'centertop';
+            app.ImageDisplay.Title = '图像显示区';
+            app.ImageDisplay.BackgroundColor = [0 0 0];
+            app.ImageDisplay.FontName = '微软雅黑';
+            app.ImageDisplay.FontSize = 20;
+            app.ImageDisplay.Position = [295 36 518 586];
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.ImageDisplay);
+            title(app.UIAxes, 'Title')
+            xlabel(app.UIAxes, 'X')
+            ylabel(app.UIAxes, 'Y')
+            zlabel(app.UIAxes, 'Z')
+            app.UIAxes.XColor = [0 0 0];
+            app.UIAxes.YColor = [0 0 0];
+            app.UIAxes.ZColor = [0 0 0];
+            app.UIAxes.ColorOrder = [0 0.447058823529412 0.741176470588235;0.850980392156863 0.325490196078431 0.0980392156862745;0.929411764705882 0.694117647058824 0.125490196078431;0.494117647058824 0.184313725490196 0.556862745098039;0.466666666666667 0.674509803921569 0.188235294117647;0.301960784313725 0.745098039215686 0.933333333333333;0.635294117647059 0.0784313725490196 0.184313725490196];
+            app.UIAxes.Position = [1 19 469 513];
+
+            % Create ImageProcessingControlModule
+            app.ImageProcessingControlModule = uipanel(app.Tab);
+            app.ImageProcessingControlModule.ForegroundColor = [1 1 1];
+            app.ImageProcessingControlModule.TitlePosition = 'centertop';
+            app.ImageProcessingControlModule.Title = '图像处理控制模块';
+            app.ImageProcessingControlModule.BackgroundColor = [0 0 0];
+            app.ImageProcessingControlModule.FontName = '微软雅黑';
+            app.ImageProcessingControlModule.FontSize = 20;
+            app.ImageProcessingControlModule.Position = [826 37 339 585];
+
+            % Create ObtainImageParameter
+            app.ObtainImageParameter = uibutton(app.ImageProcessingControlModule, 'push');
+            app.ObtainImageParameter.ButtonPushedFcn = createCallbackFcn(app, @ObtainImageParameterButtonPushed, true);
+            app.ObtainImageParameter.Position = [12 485 130 30];
+            app.ObtainImageParameter.Text = '获取图像参数';
+
+            % Create ImageParameterDisplay
+            app.ImageParameterDisplay = uipanel(app.ImageProcessingControlModule);
+            app.ImageParameterDisplay.ForegroundColor = [1 1 1];
+            app.ImageParameterDisplay.TitlePosition = 'centertop';
+            app.ImageParameterDisplay.Title = '图像参数显示';
+            app.ImageParameterDisplay.BackgroundColor = [0 0 0];
+            app.ImageParameterDisplay.FontSize = 14;
+            app.ImageParameterDisplay.Position = [152 364 170 175];
+
+            % Create TextArea_ImageParameter
+            app.TextArea_ImageParameter = uitextarea(app.ImageParameterDisplay);
+            app.TextArea_ImageParameter.FontColor = [1 1 1];
+            app.TextArea_ImageParameter.BackgroundColor = [0 0 0];
+            app.TextArea_ImageParameter.Position = [5 0 162 151];
+
+            % Create Button_GrayLevelHistogram
+            app.Button_GrayLevelHistogram = uibutton(app.ImageProcessingControlModule, 'push');
+            app.Button_GrayLevelHistogram.ButtonPushedFcn = createCallbackFcn(app, @Button_GrayLevelHistogramPushed, true);
+            app.Button_GrayLevelHistogram.Position = [12 390 130 33];
+            app.Button_GrayLevelHistogram.Text = '绘制灰度直方图';
+
+            % Create ImageProcessingFunctionDemonstrationModule
+            app.ImageProcessingFunctionDemonstrationModule = uipanel(app.ImageProcessingControlModule);
+            app.ImageProcessingFunctionDemonstrationModule.ForegroundColor = [1 1 1];
+            app.ImageProcessingFunctionDemonstrationModule.TitlePosition = 'centertop';
+            app.ImageProcessingFunctionDemonstrationModule.Title = '图像处理功能演示模块';
+            app.ImageProcessingFunctionDemonstrationModule.BackgroundColor = [0 0 0];
+            app.ImageProcessingFunctionDemonstrationModule.FontSize = 14;
+            app.ImageProcessingFunctionDemonstrationModule.Position = [17 18 305 316];
+
+            % Create Button_Scale
+            app.Button_Scale = uibutton(app.ImageProcessingFunctionDemonstrationModule, 'push');
+            app.Button_Scale.ButtonPushedFcn = createCallbackFcn(app, @Button_ScalePushed, true);
+            app.Button_Scale.FontSize = 14;
+            app.Button_Scale.Position = [14 260 100 25];
+            app.Button_Scale.Text = '图像缩放';
+
+            % Create Button_Shear
+            app.Button_Shear = uibutton(app.ImageProcessingFunctionDemonstrationModule, 'push');
+            app.Button_Shear.ButtonPushedFcn = createCallbackFcn(app, @Button_ShearPushed, true);
+            app.Button_Shear.FontSize = 14;
+            app.Button_Shear.Position = [14 165 100 25];
+            app.Button_Shear.Text = '图像转置';
+
+            % Create Button_Rotation
+            app.Button_Rotation = uibutton(app.ImageProcessingFunctionDemonstrationModule, 'push');
+            app.Button_Rotation.ButtonPushedFcn = createCallbackFcn(app, @Button_RotationPushed, true);
+            app.Button_Rotation.FontSize = 14;
+            app.Button_Rotation.Position = [14 211 100 25];
+            app.Button_Rotation.Text = '图像旋转';
+
+            % Create ButtonGroup
+            app.ButtonGroup = uibuttongroup(app.ImageProcessingFunctionDemonstrationModule);
+            app.ButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @ButtonGroupSelectionChanged, true);
+            app.ButtonGroup.BackgroundColor = [0 0 0];
+            app.ButtonGroup.Position = [11 36 100 97];
+
+            % Create Button_Vertical
+            app.Button_Vertical = uiradiobutton(app.ButtonGroup);
+            app.Button_Vertical.Text = '垂直';
+            app.Button_Vertical.FontSize = 18;
+            app.Button_Vertical.FontColor = [1 1 1];
+            app.Button_Vertical.Position = [11 54 58 22];
+            app.Button_Vertical.Value = true;
+
+            % Create Button_Level
+            app.Button_Level = uiradiobutton(app.ButtonGroup);
+            app.Button_Level.Text = '水平';
+            app.Button_Level.FontSize = 18;
+            app.Button_Level.FontColor = [1 1 1];
+            app.Button_Level.Position = [10 14 58 22];
+
+            % Create Label_2
+            app.Label_2 = uilabel(app.ImageProcessingFunctionDemonstrationModule);
+            app.Label_2.HorizontalAlignment = 'center';
+            app.Label_2.FontSize = 14;
+            app.Label_2.FontColor = [1 1 1];
+            app.Label_2.Position = [135 263 61 22];
+            app.Label_2.Text = '缩放参数';
+
+            % Create EditField_Shear
+            app.EditField_Shear = uieditfield(app.ImageProcessingFunctionDemonstrationModule, 'numeric');
+            app.EditField_Shear.HorizontalAlignment = 'center';
+            app.EditField_Shear.Position = [213 258 83 27];
+
+            % Create Label_4
+            app.Label_4 = uilabel(app.ImageProcessingFunctionDemonstrationModule);
+            app.Label_4.HorizontalAlignment = 'center';
+            app.Label_4.FontSize = 14;
+            app.Label_4.FontColor = [1 1 1];
+            app.Label_4.Position = [135 215 61 22];
+            app.Label_4.Text = '旋转参数';
+
+            % Create EditField_Rotation
+            app.EditField_Rotation = uieditfield(app.ImageProcessingFunctionDemonstrationModule, 'numeric');
+            app.EditField_Rotation.HorizontalAlignment = 'center';
+            app.EditField_Rotation.Position = [213 210 83 27];
+
+            % Create xEditFieldLabel
+            app.xEditFieldLabel = uilabel(app.ImageProcessingFunctionDemonstrationModule);
+            app.xEditFieldLabel.HorizontalAlignment = 'center';
+            app.xEditFieldLabel.FontColor = [1 1 1];
+            app.xEditFieldLabel.Position = [227 166 25 22];
+            app.xEditFieldLabel.Text = 'x';
+
+            % Create xEditField
+            app.xEditField = uieditfield(app.ImageProcessingFunctionDemonstrationModule, 'numeric');
+            app.xEditField.HorizontalAlignment = 'center';
+            app.xEditField.Position = [251 166 41 22];
+
+            % Create yEditField
+            app.yEditField = uieditfield(app.ImageProcessingFunctionDemonstrationModule, 'numeric');
+            app.yEditField.HorizontalAlignment = 'center';
+            app.yEditField.Position = [251 134 41 22];
+
+            % Create yEditFieldLabel
+            app.yEditFieldLabel = uilabel(app.ImageProcessingFunctionDemonstrationModule);
+            app.yEditFieldLabel.HorizontalAlignment = 'center';
+            app.yEditFieldLabel.FontColor = [1 1 1];
+            app.yEditFieldLabel.Position = [227 134 25 22];
+            app.yEditFieldLabel.Text = 'y';
+
+            % Create Button_Translation
+            app.Button_Translation = uibutton(app.ImageProcessingFunctionDemonstrationModule, 'state');
+            app.Button_Translation.ValueChangedFcn = createCallbackFcn(app, @Button_TranslationValueChanged, true);
+            app.Button_Translation.Text = 'xy';
+            app.Button_Translation.Position = [140 164 69 26];
+
+            % Create ImageInformationDisplayModule
+            app.ImageInformationDisplayModule = uipanel(app.Tab);
+            app.ImageInformationDisplayModule.ForegroundColor = [1 1 1];
+            app.ImageInformationDisplayModule.TitlePosition = 'centertop';
+            app.ImageInformationDisplayModule.Title = '图像信息显示模块';
+            app.ImageInformationDisplayModule.BackgroundColor = [0 0 0];
+            app.ImageInformationDisplayModule.FontSize = 20;
+            app.ImageInformationDisplayModule.Position = [9 36 260 274];
+
+            % Create TextArea_ImageInformation
+            app.TextArea_ImageInformation = uitextarea(app.ImageInformationDisplayModule);
+            app.TextArea_ImageInformation.FontColor = [1 1 1];
+            app.TextArea_ImageInformation.BackgroundColor = [0 0 0];
+            app.TextArea_ImageInformation.Position = [17 23 225 173];
+
+            % Create Button_display
+            app.Button_display = uibutton(app.ImageInformationDisplayModule, 'state');
+            app.Button_display.Text = '显示';
+            app.Button_display.Position = [17 205 82 26];
+
+            % Create PCALabel
+            app.PCALabel = uilabel(app.Tab);
+            app.PCALabel.BackgroundColor = [0 0 0];
+            app.PCALabel.HorizontalAlignment = 'center';
+            app.PCALabel.FontSize = 36;
+            app.PCALabel.FontColor = [1 1 1];
+            app.PCALabel.Position = [268 641 560 75];
+            app.PCALabel.Text = '基于PCA的人脸识别实验平台';
+
+            % Create Tab_2
+            app.Tab_2 = uitab(app.TabGroup);
+            app.Tab_2.Title = '人脸识别';
+
+            % Create Panel
+            app.Panel = uipanel(app.Tab_2);
+            app.Panel.ForegroundColor = [1 1 1];
+            app.Panel.Title = 'Panel';
+            app.Panel.BackgroundColor = [0 0 0];
+            app.Panel.Position = [9 1 1190 715];
+
+            % Create UIAxes2_1
+            app.UIAxes2_1 = uiaxes(app.Panel);
+            title(app.UIAxes2_1, 'Title')
+            xlabel(app.UIAxes2_1, 'X')
+            ylabel(app.UIAxes2_1, 'Y')
+            zlabel(app.UIAxes2_1, 'Z')
+            app.UIAxes2_1.ButtonDownFcn = createCallbackFcn(app, @UIAxes2_1ButtonDown, true);
+            app.UIAxes2_1.Position = [175 165 397 521];
+
+            % Create UIAxes2_2
+            app.UIAxes2_2 = uiaxes(app.Panel);
+            title(app.UIAxes2_2, 'Title')
+            xlabel(app.UIAxes2_2, 'X')
+            ylabel(app.UIAxes2_2, 'Y')
+            zlabel(app.UIAxes2_2, 'Z')
+            app.UIAxes2_2.Position = [633 165 397 521];
+
+            % Create Button_3
+            app.Button_3 = uibutton(app.Panel, 'push');
+            app.Button_3.FontSize = 24;
+            app.Button_3.Position = [25 339 129 49];
+            app.Button_3.Text = '识别';
+
+            % Create Button_4
+            app.Button_4 = uibutton(app.Panel, 'push');
+            app.Button_4.ButtonPushedFcn = createCallbackFcn(app, @Button_4Pushed, true);
+            app.Button_4.FontSize = 24;
+            app.Button_4.Position = [25 242 129 49];
+            app.Button_4.Text = '准确率';
+
+            % Create Button_2
+            app.Button_2 = uibutton(app.Panel, 'push');
+            app.Button_2.ButtonPushedFcn = createCallbackFcn(app, @Button_2Pushed, true);
+            app.Button_2.FontSize = 24;
+            app.Button_2.Position = [25 432 129 49];
+            app.Button_2.Text = '选择';
+
+            % Create Button
+            app.Button = uibutton(app.Panel, 'push');
+            app.Button.ButtonPushedFcn = createCallbackFcn(app, @ButtonPushed, true);
+            app.Button.FontSize = 24;
+            app.Button.Position = [25 526 129 49];
+            app.Button.Text = '训练';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = app3
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
