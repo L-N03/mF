@@ -1,0 +1,10 @@
+A=imread('lingna.jpg');
+figure(22);
+I=rgb2gray(A);
+subplot(1,2,1);
+imshow(I);
+title('原图');
+J=I';
+subplot(1,2,2);
+imshow(J);
+title('图像转置');

@@ -1,0 +1,14 @@
+figure(18);
+I=imread('lingna.jpg');
+G=imread('lingna1.jpg');
+P=imresize(G,[667,500]);
+s=size(A);
+m=s(1);n=s(2);
+A1=imresize(P,[m,n]);
+A2=double(I);
+B1=double(A1);
+C=A2.*B1/128;
+C1=uint8(C);
+subplot(3,1,1),imshow(I);
+subplot(3,1,2),imshow(P);
+subplot(3,1,3),imshow(C1);

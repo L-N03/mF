@@ -1,0 +1,9 @@
+img=imread('lingna.jpg');
+figure(15);
+a=size(img);
+J=imnoise(img,'gaussian',0,0.02);
+b=size(J);
+subplot(1,3,1),imshow(img),title('原始图像');
+subplot(1,3,2),imshow(J),title('加噪声后的图像');
+K=J-img;
+subplot(1,3,3),imshow(K),title('噪声');

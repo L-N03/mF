@@ -1,0 +1,10 @@
+I=imread('lingna.jpg');
+figure(17);
+A1=double(I);
+A2=A1*1.5;
+A3=A1/1.5;
+A2=uint8(A2);
+A3=uint8(A3);
+subplot(1,3,1),imshow(I);
+subplot(1,3,2),imshow(A2);
+subplot(1,3,3),imshow(A3);

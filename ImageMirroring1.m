@@ -1,0 +1,14 @@
+A=imread('lingna.jpg');
+I=rgb2gray(A);
+figure(21);
+subplot(2,2,1);
+imshow(I),title('原图');
+J1=mirror(I,1);
+J2=mirror(I,2);
+J3=mirror(I,3);
+subplot(2,2,2);
+imshow(J1),title('垂直镜像');
+subplot(2,2,3);
+imshow(J2),title('水平镜像');
+subplot(2,2,4);
+imshow(J3),title('水平垂直镜像');

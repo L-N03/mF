@@ -1,0 +1,12 @@
+I=imread("lingna.jpg");
+f=rgb2gray(I);
+figure(10);
+subplot(1,3,1);
+imshow(imadjust(f,[],[],0.75));
+title('Gamma 0.75');
+subplot(1,3,2);
+imshow(imadjust(f,[],[],1));
+title('Gamma 1');
+subplot(1,3,3);
+imshow(imadjust(f,[],[],1.5));
+title('Gamma 1.5');

@@ -1,0 +1,15 @@
+img=imread("lingna.jpg");
+p=imresize(img,[512,512]);
+po=rgb2gray(p);
+p64=histeq(po,64);
+p32=histeq(po,32);
+p8=histeq(po,8);
+p4=histeq(po,4);
+p2=histeq(po,2);
+figure(5);
+subplot(2,3,1),imshow(po),xlabel("gray level image");
+subplot(2,3,2),imshow(p64),xlabel("64*64");
+subplot(2,3,3),imshow(p32),xlabel("32*32");
+subplot(2,3,4),imshow(p8),xlabel("8*8");
+subplot(2,3,5),imshow(p4),xlabel("4*4");
+subplot(2,3,6),imshow(p2),xlabel("2*2");

@@ -1,0 +1,14 @@
+I=imread('lingna.jpg');
+figure(11);
+A=graythresh(I);
+B1=im2bw(I,A);
+B2=im2bw(I,125/255);
+subplot(1,3,1);
+imshow(I);
+title('original image');
+subplot(1,3,2);
+imshow(B1);
+title('自动选择阈值');
+subplot(1,3,3);
+imshow(B2);
+title('阈值125');
